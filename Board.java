@@ -1,10 +1,13 @@
 public class Board {
     
     private int[][] tiles; //immutable data
+    private int hammingValue = -1;
+    private int hashValue;
     
     public Board(int[][] blocks) {
         
         this.tiles = blocks;
+        this.hashValue = 31*17 + this.toString().hashCode();
         
     }
     
@@ -13,23 +16,28 @@ public class Board {
     }
     
     public int hamming() {
-        int referenceNum = 1;
-        int hammingNumber = 0;
-        int lastIndex = this.dimension() - 1;
         
+        if (hammingValue == -1) {
         
-        for (int i = 0; i < this.dimension(); i++) {
-            for (int j = 0; j < this.dimension(); j++) {
-                if (this.tiles[i][j] != referenceNum) {
-                    hammingNumber++;
+            int referenceNum = 1;
+            int hammingNumber = 0;
+            int lastIndex = this.dimension() - 1;
+            
+            
+            for (int i = 0; i < this.dimension(); i++) {
+                for (int j = 0; j < this.dimension(); j++) {
+                    if (this.tiles[i][j] != referenceNum) {
+                        hammingNumber++;
+                    }
+                    referenceNum++;
                 }
-                referenceNum++;
             }
+            
+            //Since we are not considering the last element which should be '0'
+            hammingNumber = hammingNumber - 1; 
+            this.hammingValue = hammingNumber;
         }
-        
-        //Since we are not considering the last element which should be '0'
-        hammingNumber = hammingNumber - 1; 
-        return hammingNumber;
+        return this.hammingValue;
         
     }
     
@@ -121,10 +129,14 @@ public class Board {
         if (y == null) return false;
         if (this.getClass() != y.getClass()) return false;
         Board that = (Board) y;
-        if (this.toString().equals(that.toString())) 
+        if (this.hashCode() == that.hashCode()) 
             return true;
         else 
             return false;
+    }
+    
+    public int hashCode() {
+        return this.hashValue;
     }
     
     
@@ -134,7 +146,6 @@ public class Board {
         
         for (int i = 0; i < this.dimension(); i++) {
             for (int j = 0; j < this.dimension(); j++) {
-
 
                 if (this.tiles[i][j] == 0) {
                     
@@ -167,7 +178,6 @@ public class Board {
                     }
                     break;
                 } //end if
-
             } //end inner for
         } // end outer for
         return queue;

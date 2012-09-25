@@ -42,6 +42,9 @@ public class Solver {
         this.moves = 0;
         Queue<Board> neighbors;
         
+        //Set<SearchNode> setForMain = new TreeSet<SearchNode>();
+        //Set<SearchNode> setForTwin = new TreeSet<SearchNode>();
+        
         while (true) {
             
             if (minNode.searchBoard.isGoal()) {
@@ -67,6 +70,14 @@ public class Solver {
                     }                    
                 }
             }
+            
+            StdOut.println("======= Current Queue is ======");
+            for (SearchNode currentNode : this.minQueue) {
+                
+                StdOut.println(currentNode.searchBoard.toString());
+                StdOut.println(currentNode.searchBoard.hamming());
+            }
+            StdOut.println("======= End of Current Queue ======");
             
             // process for twin queue
             neighbors = (Queue<Board>) minNodeFromTwinQueue.searchBoard.neighbors();   
@@ -160,16 +171,19 @@ public class Solver {
         Board initial = new Board(blocks);
         
         // solve the puzzle
+        Stopwatch timer = new Stopwatch();
         Solver solver = new Solver(initial);
         
         // print solution to standard output
+
         if (!solver.isSolvable())
             StdOut.println("No solution possible");
         else {
             StdOut.println("Minimum number of moves = " + solver.moves());
             for (Board board : solver.solution())
                 StdOut.println(board);    
-        } 
+        }
+        StdOut.println("It took " + timer.elapsedTime() + " seconds to computer.");
         
 //
 //        StdOut.println("Minimum number of moves = " + solver.moves());
