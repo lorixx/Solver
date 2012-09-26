@@ -7,6 +7,11 @@ public class Board implements Comparable<Board>{
     public Board(int[][] blocks) {
         
         this.tiles = blocks;
+        for (int i = 0; i < blocks.length; i++) {
+                for (int j = 0; j < blocks.length; j++) {
+                    this.tiles[i][j] = blocks[i][j];
+                }
+            }
         this.hashValue = 31*17 + this.toString().hashCode();
         
     }

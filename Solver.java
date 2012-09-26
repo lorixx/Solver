@@ -34,9 +34,7 @@ public class Solver {
         
         Queue<Board> neighbors;
         while (!this.minQueue.isEmpty()) {
-        
             SearchNode currentNode = this.minQueue.delMin();
-            
             
             if (currentNode.searchBoard.isGoal()) {
                 this.solutionNode = currentNode;
@@ -142,7 +140,20 @@ public class Solver {
     
     public int moves() {
         
-        return this.isSolvable ? this.moves : -1;
+        //return this.isSolvable ? this.moves : -1;
+        if (!this.isSolvable)
+            return -1;
+        else {
+            int moves = 0;
+            SearchNode tempNode = this.solutionNode;
+            while (tempNode.previousNode != null) {
+                //solutionStack.push(tempNode.previousNode.searchBoard);
+                tempNode = tempNode.previousNode;
+                moves++;
+            }
+            return moves;
+            
+        }
     }
         
     public Iterable<Board> solution() {
