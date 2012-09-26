@@ -18,8 +18,8 @@ public class Solver {
         SearchNode firstNode = new SearchNode(board, null, this.moves);
         this.minQueue.insert(firstNode);
         
-        //SearchNode firstTwinNode = new SearchNode(board.twin(), null, this.moves);
-        //this.twinQueue.insert(firstTwinNode);
+        SearchNode firstTwinNode = new SearchNode(board.twin(), null, this.moves);
+        this.twinQueue.insert(firstTwinNode);
         
         this.isSolvable = this.solvePuzzle();
         
@@ -31,15 +31,30 @@ public class Solver {
         Set<Board> openSet = new TreeSet<Board>();
         openSet.add(this.boardToSolve);
         this.moves = 0;
+
         
-        Queue<Board> neighbors;
-        while (!this.minQueue.isEmpty()) {
-            SearchNode currentNode = this.minQueue.delMin();
-            
+        Set<Board> closedSetForTwin = new TreeSet<Board>();
+        Set<Board> openSetForTwin = new TreeSet<Board>();
+        openSetForTwin.add(this.boardToSolve.twin());
+        int movesForTwin = 0;
+        
+        
+        
+        Queue<Board> neighbors; //will be used by original and twin
+        SearchNode currentNode = this.minQueue.delMin();
+        SearchNode currentTwinNode = this.twinQueue.delMin();
+        while (true) {
             if (currentNode.searchBoard.isGoal()) {
                 this.solutionNode = currentNode;
                 return true;
+            } 
+            
+            if (currentTwinNode.searchBoard.isGoal()) {
+                this.solutionNode = null;
+                return false;
             }
+            
+            
             openSet.remove(currentNode.searchBoard);
             closedSet.add(currentNode.searchBoard);
             neighbors = (Queue<Board>) currentNode.searchBoard.neighbors();
@@ -51,91 +66,27 @@ public class Solver {
                     openSet.add(board);
                 }
             }
+            currentNode = this.minQueue.delMin();
+            
+            
+            openSetForTwin.remove(currentTwinNode.searchBoard);
+            closedSetForTwin.add(currentTwinNode.searchBoard);
+            neighbors = (Queue<Board>) currentTwinNode.searchBoard.neighbors();
+            movesForTwin = currentTwinNode.movesSoFar + 1;
+            for(Board board : neighbors) {
+                if (closedSetForTwin.contains(board)) continue;
+                if ( !openSetForTwin.contains(board) ) {
+                    this.twinQueue.insert(new SearchNode(board, currentTwinNode, movesForTwin));
+                    openSetForTwin.add(board);
+                }
+            }
+            currentTwinNode = this.twinQueue.delMin();
         } 
-        return false;
     }
 
     
     public boolean isSolvable() {
-        return this.isSolvable;    
-//        while (!this.minQueue.isEmpty())
-//            this.minQueue.delMin();
-//        while (!this.twinQueue.isEmpty())
-//            this.twinQueue.delMin();
-//        
-//        SearchNode firstNode = new SearchNode(this.boardToSolve, null, this.moves);
-//        this.minQueue.insert(firstNode);
-//        
-//        SearchNode firstTwinNode = new SearchNode(this.boardToSolve.twin(), null, this.moves);
-//        this.twinQueue.insert(firstTwinNode);
-//        
-//        
-//        SearchNode minNode = this.minQueue.delMin();
-//        SearchNode minNodeFromTwinQueue = this.twinQueue.delMin();
-//        this.solutionNode = null;
-//        int moveForTwinBoard = 0;
-//        this.moves = 0;
-//        Queue<Board> neighbors;
-//        
-//        //Set<SearchNode> setForMain = new TreeSet<SearchNode>();
-//        //Set<SearchNode> setForTwin = new TreeSet<SearchNode>();
-//        
-//        while (true) {
-//            
-//            if (minNode.searchBoard.isGoal()) {
-//                this.solutionNode = minNode;
-//                return true;
-//            } else if (minNodeFromTwinQueue.searchBoard.isGoal()) {
-//                this.moves = -1;
-//                return false;
-//            }
-//            
-//            // process for original queue
-//            neighbors = (Queue<Board>) minNode.searchBoard.neighbors();   
-//            for ( Board neighborBoard : neighbors) {
-//                if (minNode.previousNode == null) {
-//                    SearchNode newSearchNode = 
-//                        new SearchNode(neighborBoard, minNode, this.moves);
-//                    this.minQueue.insert(newSearchNode);
-//                } else {
-//                    if (!neighborBoard.equals(minNode.previousNode.searchBoard)) {
-//                        SearchNode newSearchNode = 
-//                        new SearchNode(neighborBoard, minNode, this.moves);
-//                        this.minQueue.insert(newSearchNode);
-//                    }                    
-//                }
-//            }
-//            
-//            StdOut.println("======= Current Queue is ======");
-//            for (SearchNode currentNode : this.minQueue) {
-//                
-//                StdOut.println(currentNode.searchBoard.toString());
-//                StdOut.println(currentNode.searchBoard.hamming());
-//            }
-//            StdOut.println("======= End of Current Queue ======");
-//            
-//            // process for twin queue
-//            neighbors = (Queue<Board>) minNodeFromTwinQueue.searchBoard.neighbors();   
-//            for ( Board neighborBoard : neighbors) {
-//                if (minNodeFromTwinQueue.previousNode == null) {
-//                    SearchNode newSearchNode = 
-//                        new SearchNode(neighborBoard, minNodeFromTwinQueue, moveForTwinBoard);
-//                    this.twinQueue.insert(newSearchNode);
-//                } else {
-//                    if (!neighborBoard.equals(minNodeFromTwinQueue.previousNode.searchBoard)) {
-//                        SearchNode newSearchNode = 
-//                        new SearchNode(neighborBoard, minNodeFromTwinQueue, moveForTwinBoard);
-//                        this.twinQueue.insert(newSearchNode);
-//                    }                    
-//                }
-//            }
-//            
-//            minNode = this.minQueue.delMin();
-//            this.moves = minNode.movesSoFar + 1; 
-//            
-//            minNodeFromTwinQueue = this.twinQueue.delMin();
-//            moveForTwinBoard = minNodeFromTwinQueue.movesSoFar + 1;
-//        }        
+        return this.isSolvable;        
     }
     
     public int moves() {
@@ -147,7 +98,6 @@ public class Solver {
             int moves = 0;
             SearchNode tempNode = this.solutionNode;
             while (tempNode.previousNode != null) {
-                //solutionStack.push(tempNode.previousNode.searchBoard);
                 tempNode = tempNode.previousNode;
                 moves++;
             }
@@ -233,16 +183,16 @@ public class Solver {
             for (Board board : solver.solution())
                 StdOut.println(board);    
         }
-        StdOut.println("It took " + timer.elapsedTime() + " seconds to computer.");
-        
-
-        StdOut.println("Minimum number of moves = " + solver.moves());
-        StdOut.println("Minimum number of moves = " + solver.moves());
-        StdOut.println("Minimum number of moves = " + solver.moves());
-        StdOut.println("Minimum number of moves = " + solver.moves());
-
-        StdOut.println("Minimum number of moves = " + solver.moves());
-        
+//        StdOut.println("It took " + timer.elapsedTime() + " seconds to computer.");
+//        
+//
+//        StdOut.println("Minimum number of moves = " + solver.moves());
+//        StdOut.println("Minimum number of moves = " + solver.moves());
+//        StdOut.println("Minimum number of moves = " + solver.moves());
+//        StdOut.println("Minimum number of moves = " + solver.moves());
+//
+//        StdOut.println("Minimum number of moves = " + solver.moves());
+//        
         
 
     }

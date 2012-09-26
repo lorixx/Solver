@@ -1,4 +1,4 @@
-public class Board implements Comparable<Board>{
+public class Board {
     
     private int[][] tiles; //immutable data
     private int hammingValue = -1;
