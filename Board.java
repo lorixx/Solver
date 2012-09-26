@@ -1,4 +1,4 @@
-public class Board {
+public class Board implements Comparable<Board>{
     
     private int[][] tiles; //immutable data
     private int hammingValue = -1;
@@ -138,6 +138,12 @@ public class Board {
     public int hashCode() {
         return this.hashValue;
     }
+    
+    public int compareTo(Board that) {
+            if      (this.hashCode() < that.hashCode()) return -1;
+            else if (this.hashCode() > that.hashCode()) return +1;
+            else                                      return  0;
+        }   
     
     
     public Iterable<Board> neighbors() {
