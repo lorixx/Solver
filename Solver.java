@@ -1,5 +1,6 @@
 import java.util.TreeSet;
 import java.util.Set;
+import java.util.Comparator;
 
 public class Solver {
     
@@ -27,14 +28,14 @@ public class Solver {
     }    
     
     private boolean solvePuzzle() {
-        Set<Board> closedSet = new TreeSet<Board>();
-        Set<Board> openSet = new TreeSet<Board>();
-        openSet.add(this.boardToSolve);
+        Set<Board> closedSet = new TreeSet<Board>(new BoardComparator());
+        Set<Board> openSet = new TreeSet<Board>(new BoardComparator());
+        openSet.add(boardToSolve);
         this.moves = 0;
 
         
-        Set<Board> closedSetForTwin = new TreeSet<Board>();
-        Set<Board> openSetForTwin = new TreeSet<Board>();
+        Set<Board> closedSetForTwin = new TreeSet<Board>(new BoardComparator());
+        Set<Board> openSetForTwin = new TreeSet<Board>(new BoardComparator());
         openSetForTwin.add(this.boardToSolve.twin());
         int movesForTwin = 0;
         
@@ -156,6 +157,15 @@ public class Solver {
                 //&& (this.previousNode.equals(that.previousNode))
                 //&& 
                 (this.searchBoard.equals(that.searchBoard));
+        }
+    }
+    
+    private class BoardComparator implements Comparator<Board> {
+        public int compare(Board b1, Board b2) {
+
+            if      (b1.hashCode() < b2.hashCode()) return -1;
+            else if (b1.hashCode() > b2.hashCode()) return +1;
+            else                                    return  0;
         }
     }
     

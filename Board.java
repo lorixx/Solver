@@ -144,11 +144,11 @@ public class Board {
         return this.hashValue;
     }
     
-    public int compareTo(Board that) {
-            if      (this.hashCode() < that.hashCode()) return -1;
-            else if (this.hashCode() > that.hashCode()) return +1;
-            else                                      return  0;
-        }   
+//    public int compareTo(Board that) {
+//            if      (this.hashCode() < that.hashCode()) return -1;
+//            else if (this.hashCode() > that.hashCode()) return +1;
+//            else                                      return  0;
+//        }   
     
     
     public Iterable<Board> neighbors() {
