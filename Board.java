@@ -2,18 +2,16 @@ public class Board {
     
     private int[][] tiles; //immutable data
     private int hammingValue = -1;
-    private int hashValue;
+    private int manhattanValue = -1;
     
     public Board(int[][] blocks) {
         
         this.tiles = blocks;
         for (int i = 0; i < blocks.length; i++) {
-                for (int j = 0; j < blocks.length; j++) {
-                    this.tiles[i][j] = blocks[i][j];
-                }
+            for (int j = 0; j < blocks.length; j++) {
+                this.tiles[i][j] = blocks[i][j];
             }
-        this.hashValue = 31*17 + this.toString().hashCode();
-        
+        }
     }
     
     public int dimension() {
@@ -47,26 +45,29 @@ public class Board {
     }
     
     public int manhattan() {
-        int manhattanResult = 0;
-        int tempNumber = 0;
-        for (int i = 0; i < this.dimension(); i++) {
-            for (int j = 0; j < this.dimension(); j++) {
-                tempNumber = this.tiles[i][j];
-                if (tempNumber != 0) {
-                    
-                    manhattanResult += 
-                        Math.abs(i - this.getXForNumber(tempNumber)) 
-                        + Math.abs(j - this.getYForNumber(tempNumber)); 
+        
+        if (this.manhattanValue == -1) {
+            int manhattanResult = 0;
+            int tempNumber = 0;
+            for (int i = 0; i < this.dimension(); i++) {
+                for (int j = 0; j < this.dimension(); j++) {
+                    tempNumber = this.tiles[i][j];
+                    if (tempNumber != 0) {
+                        
+                        manhattanResult += 
+                            Math.abs(i - this.getXForNumber(tempNumber)) 
+                            + Math.abs(j - this.getYForNumber(tempNumber)); 
+                    }
                 }
             }
-        }
-        return manhattanResult;    
+            this.manhattanValue =  manhattanResult;
+        } 
+        return this.manhattanValue;
     }
     
     // return x index for goal position of a number
     private int getXForNumber(int number) {
         int result = number / this.dimension();
-        
         if (number == result * this.dimension())
             result--;
         return result;    
@@ -134,28 +135,11 @@ public class Board {
         if (y == null) return false;
         if (this.getClass() != y.getClass()) return false;
         Board that = (Board) y;
-        if (this.hashCode() == that.hashCode()) 
-            return true;
-        else 
-            return false;
-        //return this.toString().hashCode() == that.toString().hashCode();
+        return this.toString().equals(that.toString());
     }
-    
-    public int hashCode() {
-        return this.hashValue;
-    }
-    
-//    public int compareTo(Board that) {
-//            if      (this.hashCode() < that.hashCode()) return -1;
-//            else if (this.hashCode() > that.hashCode()) return +1;
-//            else                                      return  0;
-//        }   
-    
     
     public Iterable<Board> neighbors() {
-        
         Queue<Board> queue = new Queue<Board>();
-        
         for (int i = 0; i < this.dimension(); i++) {
             for (int j = 0; j < this.dimension(); j++) {
 

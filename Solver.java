@@ -13,8 +13,8 @@ public class Solver {
     
     public Solver(Board board) {
         this.boardToSolve = board;
-        this.minQueue = new MinPQ<SearchNode>();
-        this.twinQueue = new MinPQ<SearchNode>();
+        this.minQueue = new MinPQ<SearchNode>(new PriorityComparator());
+        this.twinQueue = new MinPQ<SearchNode>(new PriorityComparator());
         
         SearchNode firstNode = new SearchNode(board, null, this.moves);
         this.minQueue.insert(firstNode);
@@ -25,18 +25,20 @@ public class Solver {
         this.isSolvable = this.solvePuzzle();
         
         
-    }    
+    }   
+    
+
     
     private boolean solvePuzzle() {
-        Set<Board> closedSet = new TreeSet<Board>(new BoardComparator());
-        Set<Board> openSet = new TreeSet<Board>(new BoardComparator());
-        openSet.add(boardToSolve);
+        Set<SearchNode> closedSet = new TreeSet<SearchNode>();
+        Set<SearchNode> openSet = new TreeSet<SearchNode>();
+        openSet.add(this.minQueue.min());
         this.moves = 0;
 
         
-        Set<Board> closedSetForTwin = new TreeSet<Board>(new BoardComparator());
-        Set<Board> openSetForTwin = new TreeSet<Board>(new BoardComparator());
-        openSetForTwin.add(this.boardToSolve.twin());
+        Set<SearchNode> closedSetForTwin = new TreeSet<SearchNode>();
+        Set<SearchNode> openSetForTwin = new TreeSet<SearchNode>();
+        openSetForTwin.add(this.twinQueue.min());
         int movesForTwin = 0;
         
         Queue<Board> neighbors; //will be used by original and twin
@@ -53,29 +55,31 @@ public class Solver {
                 return false;
             }  
             
-            openSet.remove(currentNode.searchBoard);
-            closedSet.add(currentNode.searchBoard);
+            openSet.remove(currentNode);
+            closedSet.add(currentNode);
             neighbors = (Queue<Board>) currentNode.searchBoard.neighbors();
             this.moves = currentNode.movesSoFar + 1;
             for(Board board : neighbors) {
-                if (closedSet.contains(board)) continue;
-                if ( !openSet.contains(board) ) {
-                    this.minQueue.insert(new SearchNode(board, currentNode, this.moves));
-                    openSet.add(board);
+                if (closedSet.contains(new SearchNode(board, null, 0))) continue;
+                if ( !openSet.contains(new SearchNode(board, null, 0)) ) {
+                    SearchNode newNode = new SearchNode(board, currentNode, this.moves);
+                    this.minQueue.insert(newNode);
+                    openSet.add(newNode);
                 }
             }
             currentNode = this.minQueue.delMin();
             
             
-            openSetForTwin.remove(currentTwinNode.searchBoard);
-            closedSetForTwin.add(currentTwinNode.searchBoard);
+            openSetForTwin.remove(currentTwinNode);
+            closedSetForTwin.add(currentTwinNode);
             neighbors = (Queue<Board>) currentTwinNode.searchBoard.neighbors();
             movesForTwin = currentTwinNode.movesSoFar + 1;
             for(Board board : neighbors) {
-                if (closedSetForTwin.contains(board)) continue;
-                if ( !openSetForTwin.contains(board) ) {
-                    this.twinQueue.insert(new SearchNode(board, currentTwinNode, movesForTwin));
-                    openSetForTwin.add(board);
+                if (closedSetForTwin.contains(new SearchNode(board, null, 0))) continue;
+                if ( !openSetForTwin.contains(new SearchNode(board, null, 0)) ) {
+                    SearchNode newNode = new SearchNode(board, currentNode, this.moves);
+                    this.twinQueue.insert(newNode);
+                    openSetForTwin.add(newNode);
                 }
             }
             currentTwinNode = this.twinQueue.delMin();
@@ -118,23 +122,36 @@ public class Solver {
             return null;
     }
     
+    private class PriorityComparator implements Comparator<SearchNode> {
+        
+        public int compare(SearchNode s1, SearchNode s2) {
+
+            if      (s1.priorityValue < s2.priorityValue) return -1;
+            else if (s1.priorityValue > s2.priorityValue) return +1;
+            else                                          return  0;
+        } 
+    }
+    
     private class SearchNode implements Comparable<SearchNode>{
         public SearchNode previousNode;
         public Board searchBoard;
         public int movesSoFar;
         private int priorityValue;
+        private int hashCode;
                 
         public SearchNode(Board board, SearchNode previous, int moves) {
             this.searchBoard = board;
             this.previousNode = previous;   
             this.movesSoFar = moves;
             this.priorityValue = moves + board.hamming();
+            this.hashCode = this.searchBoard.toString().hashCode();  
         }
         
         public int compareTo(SearchNode that) {
-            if      (this.priorityValue < that.priorityValue) return -1;
-            else if (this.priorityValue > that.priorityValue) return +1;
-            else                                              return  0;
+            
+            if      (this.hashCode() < that.hashCode()) return -1;
+            else if (this.hashCode() > that.hashCode()) return +1;
+            else                                        return  0;
         }    
 
         // is this SearchNode equal to x?
@@ -144,19 +161,23 @@ public class Solver {
             if (x == null) return false;
             if (x.getClass() != this.getClass()) return false;
             SearchNode that = (SearchNode) x;
-            return //(this.priorityValue == that.priorityValue) 
-                //&& (this.previousNode.equals(that.previousNode))
-                //&& 
-                (this.searchBoard.equals(that.searchBoard));
+            return this.hashCode() == that.hashCode();
+        }
+        
+        public int hashCode() {
+            return this.hashCode;           
         }
     }
     
     private class BoardComparator implements Comparator<Board> {
         public int compare(Board b1, Board b2) {
-
-            if      (b1.hashCode() < b2.hashCode()) return -1;
-            else if (b1.hashCode() > b2.hashCode()) return +1;
-            else                                    return  0;
+            
+            int h1 = b1.hamming() * (b1.manhattan() + 31);
+            int h2 = b2.hamming() * (b2.manhattan() + 31);
+            
+            if      (h1  < h2) return -1;
+            else if (h1 > h2)  return +1;
+            else               return  0;
         }
     }
     
@@ -184,7 +205,7 @@ public class Solver {
             for (Board board : solver.solution())
                 StdOut.println(board);    
         }
-//        StdOut.println("It took " + timer.elapsedTime() + " seconds to computer.");
+        StdOut.println("It took " + timer.elapsedTime() + " seconds to computer.");
 //        
 //
 //        StdOut.println("Minimum number of moves = " + solver.moves());
