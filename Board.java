@@ -138,6 +138,7 @@ public class Board {
             return true;
         else 
             return false;
+        //return this.toString().hashCode() == that.toString().hashCode();
     }
     
     public int hashCode() {

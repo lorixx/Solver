@@ -39,8 +39,6 @@ public class Solver {
         openSetForTwin.add(this.boardToSolve.twin());
         int movesForTwin = 0;
         
-        
-        
         Queue<Board> neighbors; //will be used by original and twin
         SearchNode currentNode = this.minQueue.delMin();
         SearchNode currentTwinNode = this.twinQueue.delMin();
@@ -53,8 +51,7 @@ public class Solver {
             if (currentTwinNode.searchBoard.isGoal()) {
                 this.solutionNode = null;
                 return false;
-            }
-            
+            }  
             
             openSet.remove(currentNode.searchBoard);
             closedSet.add(currentNode.searchBoard);
@@ -102,24 +99,19 @@ public class Solver {
                 tempNode = tempNode.previousNode;
                 moves++;
             }
-            return moves;
-            
+            return moves;  
         }
     }
         
     public Iterable<Board> solution() {
         if (this.isSolvable) {
-            Stack<Board> solutionStack= new Stack<Board>();
-            
-            SearchNode tempNode = this.solutionNode;
-            
-            solutionStack.push(tempNode.searchBoard);
-            
+            Stack<Board> solutionStack= new Stack<Board>();          
+            SearchNode tempNode = this.solutionNode;     
+            solutionStack.push(tempNode.searchBoard);         
             while (tempNode.previousNode != null) {
                 solutionStack.push(tempNode.previousNode.searchBoard);
                 tempNode = tempNode.previousNode;
-            }
-            
+            }          
             return solutionStack;
             
         } else
@@ -131,8 +123,7 @@ public class Solver {
         public Board searchBoard;
         public int movesSoFar;
         private int priorityValue;
-        
-        
+                
         public SearchNode(Board board, SearchNode previous, int moves) {
             this.searchBoard = board;
             this.previousNode = previous;   
