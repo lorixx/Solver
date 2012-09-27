@@ -22,17 +22,10 @@ public class Solver {
         SearchNode firstTwinNode = new SearchNode(board.twin(), null, this.moves);
         this.twinQueue.insert(firstTwinNode);
         
-        this.isSolvable = this.solvePuzzle();
-        
-        
+        this.isSolvable = this.solvePuzzle();  
     }   
     
-
-    
     private boolean solvePuzzle() {
-//        Set<SearchNode> closedSet = new TreeSet<SearchNode>();
-//        Set<SearchNode> openSet = new TreeSet<SearchNode>();
-//        openSet.add(this.minQueue.min());
         
         HashMap<Integer, SearchNode> closedSet = new HashMap<Integer, SearchNode>();
         HashMap<Integer, SearchNode> openSet = new HashMap<Integer, SearchNode>();
@@ -40,10 +33,6 @@ public class Solver {
         openSet.put(minNode.hashCode(), minNode);
         this.moves = 0;
 
-        
-//        Set<SearchNode> closedSetForTwin = new TreeSet<SearchNode>();
-//        Set<SearchNode> openSetForTwin = new TreeSet<SearchNode>();
-//        openSetForTwin.add(this.twinQueue.min());
         
         HashMap<Integer, SearchNode> closedSetForTwin = new HashMap<Integer, SearchNode>();
         HashMap<Integer, SearchNode> openSetForTwin = new HashMap<Integer, SearchNode>();
@@ -54,14 +43,27 @@ public class Solver {
         Queue<Board> neighbors; //will be used by original and twin
         SearchNode currentNode = this.minQueue.delMin();
         SearchNode currentTwinNode = this.twinQueue.delMin();
+        
+        int dimension = boardToSolve.dimension();
+        int[][] goalArray = new int[dimension][dimension];
+        int startNum = 1;
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < dimension; j++) {
+                goalArray[i][j] = startNum++;
+            }
+        }
+        goalArray[dimension - 1][dimension - 1] = 0;
+        
+        Board goalBoard = new Board(goalArray);
+        int goalHashCode = goalBoard.toString().hashCode();
+        
         while (true) {
-            if (currentNode.searchBoard.isGoal()) {
+            if (currentNode.hashCode() == goalHashCode) { //TODO: refactor isGoal() for performance
                 this.solutionNode = currentNode;
-                StdOut.println("system moves is " + this.moves);
                 return true;
             } 
             
-            if (currentTwinNode.searchBoard.isGoal()) {
+            if (currentTwinNode.hashCode() == goalHashCode) {
                 this.solutionNode = null;
                 return false;
             }  
@@ -71,15 +73,17 @@ public class Solver {
             neighbors = (Queue<Board>) currentNode.searchBoard.neighbors();
             this.moves = currentNode.movesSoFar + 1;
             for(Board board : neighbors) {
-                if (closedSet.containsKey(board.toString().hashCode())) continue;
                 
-                boolean isInOpenSet = openSet.containsKey(board.toString().hashCode());
+                int codeTofind = board.toString().hashCode();
+                if (closedSet.containsKey(codeTofind)) continue;
+                
+                boolean isInOpenSet = openSet.containsKey(codeTofind);
                 if ( !isInOpenSet  ) {
                     SearchNode newNode = new SearchNode(board, currentNode, this.moves);
                     this.minQueue.insert(newNode);
                     openSet.put(newNode.hashCode(), newNode);
                 } else { //already in, then check if need update
-                    SearchNode currentNeighbor = openSet.get(board.toString().hashCode());
+                    SearchNode currentNeighbor = openSet.get(codeTofind);
                     if (currentNeighbor.movesSoFar > this.moves) {
                         currentNeighbor.movesSoFar = this.moves;
                         currentNeighbor.previousNode = currentNode;
@@ -94,15 +98,16 @@ public class Solver {
             neighbors = (Queue<Board>) currentTwinNode.searchBoard.neighbors();
             movesForTwin = currentTwinNode.movesSoFar + 1;
             for(Board board : neighbors) {
-                if (closedSetForTwin.containsKey(board.toString().hashCode())) continue;
+                int codeTofind = board.toString().hashCode();
+                if (closedSetForTwin.containsKey(codeTofind)) continue;
                 
-                boolean isInOpenSet = openSetForTwin.containsKey(board.toString().hashCode());
+                boolean isInOpenSet = openSetForTwin.containsKey(codeTofind);
                 if ( !isInOpenSet  ) {
                     SearchNode newNode = new SearchNode(board, currentTwinNode, this.moves);
                     this.twinQueue.insert(newNode);
                     openSetForTwin.put(newNode.hashCode(), newNode);
                 } else { //already in, then check if need update
-                    SearchNode currentNeighbor = openSetForTwin.get(board.toString().hashCode());
+                    SearchNode currentNeighbor = openSetForTwin.get(codeTofind);
                     if (currentNeighbor.movesSoFar > this.moves) {
                         currentNeighbor.movesSoFar = this.moves;
                         currentNeighbor.previousNode = currentTwinNode;
@@ -165,15 +170,16 @@ public class Solver {
         public SearchNode previousNode;
         public Board searchBoard;
         public int movesSoFar;
-        //private int priorityValue;
         private int hashCode;
+        private String description;
                 
         public SearchNode(Board board, SearchNode previous, int moves) {
             this.searchBoard = board;
             this.previousNode = previous;   
             this.movesSoFar = moves;
-            //this.priorityValue = moves + board.hamming();
-            this.hashCode = this.searchBoard.toString().hashCode();  
+            this.description = this.searchBoard.toString();
+            this.hashCode = this.description.hashCode();  
+            
         }
         
         public int compareTo(SearchNode that) {
@@ -195,6 +201,10 @@ public class Solver {
         
         public int hashCode() {
             return this.hashCode;           
+        }
+        
+        public String description() {
+            return this.description;
         }
     }
     
