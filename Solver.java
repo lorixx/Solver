@@ -27,93 +27,48 @@ public class Solver {
     
     private boolean solvePuzzle() {
         
-        HashMap<Integer, SearchNode> closedSet = new HashMap<Integer, SearchNode>();
-        HashMap<Integer, SearchNode> openSet = new HashMap<Integer, SearchNode>();
+
         SearchNode minNode = this.minQueue.min();
-        openSet.put(minNode.hashCode(), minNode);
         this.moves = 0;
 
-        
-        HashMap<Integer, SearchNode> closedSetForTwin = new HashMap<Integer, SearchNode>();
-        HashMap<Integer, SearchNode> openSetForTwin = new HashMap<Integer, SearchNode>();
         SearchNode minNodeForTwin = this.twinQueue.min();
-        openSetForTwin.put(minNodeForTwin.hashCode(), minNodeForTwin);
         int movesForTwin = 0;
         
         Queue<Board> neighbors; //will be used by original and twin
         SearchNode currentNode = this.minQueue.delMin();
         SearchNode currentTwinNode = this.twinQueue.delMin();
         
-        int dimension = boardToSolve.dimension();
-        int[][] goalArray = new int[dimension][dimension];
-        int startNum = 1;
-        for (int i = 0; i < dimension; i++) {
-            for (int j = 0; j < dimension; j++) {
-                goalArray[i][j] = startNum++;
-            }
-        }
-        goalArray[dimension - 1][dimension - 1] = 0;
-        
-        Board goalBoard = new Board(goalArray);
-        int goalHashCode = goalBoard.toString().hashCode();
         
         while (true) {
-            if (currentNode.hashCode() == goalHashCode) { //TODO: refactor isGoal() for performance
+            if (currentNode.searchBoard.isGoal()) { //TODO: refactor isGoal() for performance
                 this.solutionNode = currentNode;
                 return true;
             } 
-            
-            if (currentTwinNode.hashCode() == goalHashCode) {
+            if (currentTwinNode.searchBoard.isGoal()) {
                 this.solutionNode = null;
                 return false;
             }  
             
-            openSet.remove(currentNode.hashCode());
-            closedSet.put(currentNode.hashCode(), currentNode);
             neighbors = (Queue<Board>) currentNode.searchBoard.neighbors();
             this.moves = currentNode.movesSoFar + 1;
             for(Board board : neighbors) {
                 
-                int codeTofind = board.toString().hashCode();
-                if (closedSet.containsKey(codeTofind)) continue;
-                
-                boolean isInOpenSet = openSet.containsKey(codeTofind);
-                if ( !isInOpenSet  ) {
-                    SearchNode newNode = new SearchNode(board, currentNode, this.moves);
-                    this.minQueue.insert(newNode);
-                    openSet.put(newNode.hashCode(), newNode);
-                } else { //already in, then check if need update
-                    SearchNode currentNeighbor = openSet.get(codeTofind);
-                    if (currentNeighbor.movesSoFar > this.moves) {
-                        currentNeighbor.movesSoFar = this.moves;
-                        currentNeighbor.previousNode = currentNode;
-                    }     
-                }
+                if (currentNode.previousNode != null && currentNode.previousNode.searchBoard.equals(board)) continue;               
+
+                SearchNode newNode = new SearchNode(board, currentNode, this.moves);
+                this.minQueue.insert(newNode);
             }
             currentNode = this.minQueue.delMin();
             
             
-            openSetForTwin.remove(currentTwinNode.hashCode());
-            closedSetForTwin.put(currentTwinNode.hashCode(), currentTwinNode);
             neighbors = (Queue<Board>) currentTwinNode.searchBoard.neighbors();
-            movesForTwin = currentTwinNode.movesSoFar + 1;
+            this.moves = currentTwinNode.movesSoFar + 1;
             for(Board board : neighbors) {
-                int codeTofind = board.toString().hashCode();
-                if (closedSetForTwin.containsKey(codeTofind)) continue;
                 
-                boolean isInOpenSet = openSetForTwin.containsKey(codeTofind);
-                if ( !isInOpenSet  ) {
-                    SearchNode newNode = new SearchNode(board, currentTwinNode, this.moves);
-                    this.twinQueue.insert(newNode);
-                    openSetForTwin.put(newNode.hashCode(), newNode);
-                } else { //already in, then check if need update
-                    SearchNode currentNeighbor = openSetForTwin.get(codeTofind);
-                    if (currentNeighbor.movesSoFar > this.moves) {
-                        currentNeighbor.movesSoFar = this.moves;
-                        currentNeighbor.previousNode = currentTwinNode;
-                    }     
-                }
-                
+                if (currentTwinNode.previousNode != null && currentTwinNode.previousNode.searchBoard.equals(board)) continue;               
+
+                SearchNode newNode = new SearchNode(board, currentTwinNode, this.moves);
+                this.twinQueue.insert(newNode);
             }
             currentTwinNode = this.twinQueue.delMin();
         } 
@@ -166,46 +121,28 @@ public class Solver {
         } 
     }
     
-    private class SearchNode implements Comparable<SearchNode>{
+    private class SearchNode {
         public SearchNode previousNode;
         public Board searchBoard;
         public int movesSoFar;
-        private int hashCode;
-        private String description;
                 
         public SearchNode(Board board, SearchNode previous, int moves) {
             this.searchBoard = board;
             this.previousNode = previous;   
-            this.movesSoFar = moves;
-            this.description = this.searchBoard.toString();
-            this.hashCode = this.description.hashCode();  
-            
+            this.movesSoFar = moves;           
         }
         
-        public int compareTo(SearchNode that) {
-            
-            if      (this.hashCode() < that.hashCode()) return -1;
-            else if (this.hashCode() > that.hashCode()) return +1;
-            else                                        return  0;
-        }    
 
         // is this SearchNode equal to x?
         // only compare the two searchBoards for equality 
-        public boolean equals(Object x) {
-            if (x == this) return true;
-            if (x == null) return false;
-            if (x.getClass() != this.getClass()) return false;
-            SearchNode that = (SearchNode) x;
-            return this.hashCode() == that.hashCode();
-        }
+//        public boolean equals(Object x) {
+//            if (x == this) return true;
+//            if (x == null) return false;
+//            if (x.getClass() != this.getClass()) return false;
+//            SearchNode that = (SearchNode) x;
+//            return this.hashCode() == that.hashCode();
+//        }
         
-        public int hashCode() {
-            return this.hashCode;           
-        }
-        
-        public String description() {
-            return this.description;
-        }
     }
     
     
