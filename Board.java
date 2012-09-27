@@ -2,14 +2,27 @@ public class Board {
     
     private int[][] tiles; //immutable data
     private int hammingValue = -1;
-    private int manhattanValue = -1;
+    private int manhattanValue = 0;
     
     public Board(int[][] blocks) {
         
         this.tiles = blocks;
+        
+        int tempNumber = 0;
+        int referenceNumber = 1;
         for (int i = 0; i < blocks.length; i++) {
             for (int j = 0; j < blocks.length; j++) {
                 this.tiles[i][j] = blocks[i][j];
+                tempNumber = blocks[i][j];
+                if (tempNumber != 0) {
+                    this.manhattanValue += Math.abs(i - this.getXForNumber(tempNumber)) 
+                            + Math.abs(j - this.getYForNumber(tempNumber)); 
+                }
+                
+                if (tempNumber != referenceNumber) {
+                    this.hammingValue++;
+                }
+                referenceNumber++; 
             }
         }
     }
@@ -18,50 +31,12 @@ public class Board {
         return this.tiles.length;
     }
     
-    public int hamming() {
-        
-        if (hammingValue == -1) {
-        
-            int referenceNum = 1;
-            int hammingNumber = 0;
-            int lastIndex = this.dimension() - 1;
-            
-            
-            for (int i = 0; i < this.dimension(); i++) {
-                for (int j = 0; j < this.dimension(); j++) {
-                    if (this.tiles[i][j] != referenceNum) {
-                        hammingNumber++;
-                    }
-                    referenceNum++;
-                }
-            }
-            
-            //Since we are not considering the last element which should be '0'
-            hammingNumber = hammingNumber - 1; 
-            this.hammingValue = hammingNumber;
-        }
+    public int hamming() {   
         return this.hammingValue;
-        
     }
     
     public int manhattan() {
         
-        if (this.manhattanValue == -1) {
-            int manhattanResult = 0;
-            int tempNumber = 0;
-            for (int i = 0; i < this.dimension(); i++) {
-                for (int j = 0; j < this.dimension(); j++) {
-                    tempNumber = this.tiles[i][j];
-                    if (tempNumber != 0) {
-                        
-                        manhattanResult += 
-                            Math.abs(i - this.getXForNumber(tempNumber)) 
-                            + Math.abs(j - this.getYForNumber(tempNumber)); 
-                    }
-                }
-            }
-            this.manhattanValue =  manhattanResult;
-        } 
         return this.manhattanValue;
     }
     
@@ -83,25 +58,7 @@ public class Board {
     }
     
     public boolean isGoal() {
-        int startNum = 1;
-        int lastIndex = this.dimension() - 1;
-        
-        for (int i = 0; i < this.dimension() - 1; i++) {
-            for (int j = 0; j < this.dimension(); j++) {
-                if (this.tiles[i][j] != startNum) 
-                    return false;
-                startNum++;
-            }
-        }
-        
-        for (int k = 0; k < this.dimension() - 1; k++) {
-            if (this.tiles[lastIndex][k] != startNum)
-                return false;
-            startNum++;
-        }
-        
-        if (this.tiles[lastIndex][lastIndex] != 0) return false;
-        return true;
+        return this.manhattan() == 0;
     }
     
     public Board twin() {

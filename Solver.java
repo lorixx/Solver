@@ -29,7 +29,7 @@ public class Solver {
         
 
         SearchNode minNode = this.minQueue.min();
-        this.moves = 0;
+        int moves = 0;
 
         SearchNode minNodeForTwin = this.twinQueue.min();
         int movesForTwin = 0;
@@ -49,29 +49,22 @@ public class Solver {
                 return false;
             }  
             
-            neighbors = (Queue<Board>) currentNode.searchBoard.neighbors();
-            this.moves = currentNode.movesSoFar + 1;
-            for(Board board : neighbors) {
-                
-                if (currentNode.previousNode != null && currentNode.previousNode.searchBoard.equals(board)) continue;               
-
-                SearchNode newNode = new SearchNode(board, currentNode, this.moves);
-                this.minQueue.insert(newNode);
-            }
-            currentNode = this.minQueue.delMin();
-            
-            
-            neighbors = (Queue<Board>) currentTwinNode.searchBoard.neighbors();
-            this.moves = currentTwinNode.movesSoFar + 1;
-            for(Board board : neighbors) {
-                
-                if (currentTwinNode.previousNode != null && currentTwinNode.previousNode.searchBoard.equals(board)) continue;               
-
-                SearchNode newNode = new SearchNode(board, currentTwinNode, this.moves);
-                this.twinQueue.insert(newNode);
-            }
-            currentTwinNode = this.twinQueue.delMin();
+            currentNode = this.getNextNode(this.minQueue, currentNode);
+            currentTwinNode = this.getNextNode(this.twinQueue, currentTwinNode);
         } 
+    }
+    
+    private SearchNode getNextNode(MinPQ<SearchNode> minQueue, SearchNode currentNode) {
+        Queue<Board> neighbors = (Queue<Board>) currentNode.searchBoard.neighbors();
+        int moves = currentNode.movesSoFar + 1;
+        for(Board board : neighbors) {
+            
+            if (currentNode.previousNode != null && currentNode.previousNode.searchBoard.equals(board)) continue;               
+            
+            SearchNode newNode = new SearchNode(board, currentNode, moves);
+            minQueue.insert(newNode);
+        }
+        return minQueue.delMin();
     }
 
     
