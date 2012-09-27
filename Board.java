@@ -135,7 +135,15 @@ public class Board {
         if (y == null) return false;
         if (this.getClass() != y.getClass()) return false;
         Board that = (Board) y;
-        return this.toString().equals(that.toString());
+        
+        for (int i = 0; i < this.dimension(); i++) {
+            for (int j = 0; j < this.dimension(); j++) {
+                if (this.tiles[i][j] != that.tiles[i][j])
+                    return false;
+            }
+        }
+        
+        return true;
     }
     
     public Iterable<Board> neighbors() {
