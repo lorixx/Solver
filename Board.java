@@ -1,8 +1,12 @@
+import java.util.Arrays;
+
 public class Board {
     
     private int[][] tiles; //immutable data
     private int hammingValue = -1;
     private int manhattanValue = 0;
+    private int xForZero;
+    private int yForZero;
     
     public Board(int[][] blocks) {
         
@@ -17,6 +21,9 @@ public class Board {
                 if (tempNumber != 0) {
                     this.manhattanValue += Math.abs(i - this.getXForNumber(tempNumber)) 
                             + Math.abs(j - this.getYForNumber(tempNumber)); 
+                } else {
+                    xForZero = i;
+                    yForZero = j;
                 }
                 
                 if (tempNumber != referenceNumber) {
@@ -93,65 +100,60 @@ public class Board {
         if (this.getClass() != y.getClass()) return false;
         Board that = (Board) y;
         
-        for (int i = 0; i < this.dimension(); i++) {
-            for (int j = 0; j < this.dimension(); j++) {
-                if (this.tiles[i][j] != that.tiles[i][j])
-                    return false;
-            }
-        }
+//        for (int i = 0; i < this.dimension(); i++) {
+//            for (int j = 0; j < this.dimension(); j++) {
+//                if (this.tiles[i][j] != that.tiles[i][j])
+//                    return false;
+//            }
+//        }
         
-        return true;
+        return Arrays.deepEquals(this.tiles, that.tiles);
     }
     
     public Iterable<Board> neighbors() {
         Queue<Board> queue = new Queue<Board>();
-        for (int i = 0; i < this.dimension(); i++) {
-            for (int j = 0; j < this.dimension(); j++) {
 
-                if (this.tiles[i][j] == 0) {
-                    
-                    if (i > 0) {
-                        int[][] newArray = this.cloneTiles();
-                        newArray[i][j] = newArray[i - 1][j];
-                        newArray[i - 1][j] = 0;
-                        queue.enqueue(new Board(newArray));
-                    }
-                    
-                    if (i < this.dimension() - 1) {
-                        int[][] newArray = this.cloneTiles();
-                        newArray[i][j] = newArray[i + 1][j];
-                        newArray[i + 1][j] = 0;
-                        queue.enqueue(new Board(newArray));
-                    }
-                    
-                    if (j > 0) {
-                        int[][] newArray = this.cloneTiles();
-                        newArray[i][j] = newArray[i][j - 1];
-                        newArray[i][j - 1] = 0;
-                        queue.enqueue(new Board(newArray));
-                    }
-                    
-                    if (j < this.dimension() - 1) {
-                        int[][] newArray = this.cloneTiles();
-                        newArray[i][j] = newArray[i][j + 1];
-                        newArray[i][j + 1] = 0;
-                        queue.enqueue(new Board(newArray));
-                    }
-                    break;
-                } //end if
-            } //end inner for
-        } // end outer for
+
+
+        int i = xForZero;
+        int j = yForZero;
+        if (i > 0) {
+            int[][] newArray = this.cloneTiles();
+            newArray[i][j] = newArray[i - 1][j];
+            newArray[i - 1][j] = 0;
+            queue.enqueue(new Board(newArray));
+        }
+        
+        if (i < this.dimension() - 1) {
+            int[][] newArray = this.cloneTiles(); 
+            newArray[i][j] = newArray[i + 1][j];
+            newArray[i + 1][j] = 0;
+            queue.enqueue(new Board(newArray));
+        }
+        
+        if (j > 0) {
+            int[][] newArray = this.cloneTiles();
+            newArray[i][j] = newArray[i][j - 1];
+            newArray[i][j - 1] = 0;
+            queue.enqueue(new Board(newArray));
+        }
+        
+        if (j < this.dimension() - 1) {
+            int[][] newArray = this.cloneTiles();    //this.cloneTiles();
+            newArray[i][j] = newArray[i][j + 1];
+            newArray[i][j + 1] = 0;
+            queue.enqueue(new Board(newArray));
+        }
+
         return queue;
     }
     
     private int[][] cloneTiles () {
         int length = this.dimension();
-        int[][] newArray =  new int[length][length];
-        for (int i = 0; i < length; i++) {
-            for (int j = 0; j < length; j++) {
-                newArray[i][j] = this.tiles[i][j];
-            }
-        }
+        int[][] newArray = new int[length][]; 
+        for(int i = 0; i < length; i++)
+            newArray[i] = this.tiles[i].clone();
+        
         return newArray;
     }
     
