@@ -123,19 +123,7 @@ public class Solver {
             this.searchBoard = board;
             this.previousNode = previous;   
             this.movesSoFar = moves;           
-        }
-        
-
-        // is this SearchNode equal to x?
-        // only compare the two searchBoards for equality 
-//        public boolean equals(Object x) {
-//            if (x == this) return true;
-//            if (x == null) return false;
-//            if (x.getClass() != this.getClass()) return false;
-//            SearchNode that = (SearchNode) x;
-//            return this.hashCode() == that.hashCode();
-//        }
-        
+        }        
     }
     
     

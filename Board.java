@@ -3,13 +3,14 @@ import java.util.Arrays;
 public class Board {
     
     private int[][] tiles; //immutable data
-    private int hammingValue = -1;
+    private int hammingValue = -1; //has to start from -1 so that we calculate correctly
     private int manhattanValue = 0;
     private int xForZero;
     private int yForZero;
     
     public Board(int[][] blocks) {
         
+        //this.tiles = new int[blocks.length][blocks.length];
         this.tiles = blocks;
         
         int tempNumber = 0;
@@ -100,20 +101,19 @@ public class Board {
         if (this.getClass() != y.getClass()) return false;
         Board that = (Board) y;
         
-//        for (int i = 0; i < this.dimension(); i++) {
-//            for (int j = 0; j < this.dimension(); j++) {
-//                if (this.tiles[i][j] != that.tiles[i][j])
-//                    return false;
-//            }
-//        }
+        for (int i = 0; i < this.dimension(); i++) {
+            for (int j = 0; j < this.dimension(); j++) {
+                if (this.tiles[i][j] != that.tiles[i][j])
+                    return false;
+            }
+        }
+        return true;
         
-        return Arrays.deepEquals(this.tiles, that.tiles);
+        //return Arrays.deepEquals(this.tiles, that.tiles);
     }
     
     public Iterable<Board> neighbors() {
         Queue<Board> queue = new Queue<Board>();
-
-
 
         int i = xForZero;
         int j = yForZero;
