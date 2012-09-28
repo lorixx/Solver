@@ -48,8 +48,8 @@ public class Solver {
                 this.solutionNode = null;
                 return false;
             }  
-            
-            currentNode = this.getNextNode(this.minQueue, currentNode);
+  
+            currentNode = this.getNextNode(this.minQueue, currentNode);           
             currentTwinNode = this.getNextNode(this.twinQueue, currentTwinNode);
         } 
     }
@@ -59,8 +59,10 @@ public class Solver {
         int moves = currentNode.movesSoFar + 1;
         for(Board board : neighbors) {
             
-            if (currentNode.previousNode != null && currentNode.previousNode.searchBoard.equals(board)) continue;               
-            
+            if (currentNode.previousNode != null 
+                    && currentNode.previousNode.searchBoard.equals(board)) 
+                continue;               
+
             SearchNode newNode = new SearchNode(board, currentNode, moves);
             minQueue.insert(newNode);
         }
@@ -106,8 +108,8 @@ public class Solver {
     private class PriorityComparator implements Comparator<SearchNode> {
         
         public int compare(SearchNode s1, SearchNode s2) {
-            int v1 = s1.searchBoard.hamming() + s1.movesSoFar;
-            int v2 = s2.searchBoard.hamming() + s2.movesSoFar;
+            int v1 = s1.searchBoard.manhattan() + s1.movesSoFar;
+            int v2 = s2.searchBoard.manhattan() + s2.movesSoFar;
             if      (v1 < v2) return -1;
             else if (v1 > v2) return +1;
             else              return  0;
@@ -151,17 +153,6 @@ public class Solver {
             for (Board board : solver.solution())
                 StdOut.println(board);    
         }
-        StdOut.println("It took " + timer.elapsedTime() + " seconds to computer.");
-//        
-//
-//        StdOut.println("Minimum number of moves = " + solver.moves());
-//        StdOut.println("Minimum number of moves = " + solver.moves());
-//        StdOut.println("Minimum number of moves = " + solver.moves());
-//        StdOut.println("Minimum number of moves = " + solver.moves());
-//
-//        StdOut.println("Minimum number of moves = " + solver.moves());
-//        
-        
-
+        //StdOut.println("It took " + timer.elapsedTime() + " seconds to computer.");
     }
 }

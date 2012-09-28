@@ -10,8 +10,8 @@ public class Board {
     
     public Board(int[][] blocks) {
         
-        //this.tiles = new int[blocks.length][blocks.length];
-        this.tiles = blocks;
+        this.tiles = new int[blocks.length][blocks.length];
+        //this.tiles = blocks;
         
         int tempNumber = 0;
         int referenceNumber = 1;
@@ -100,6 +100,8 @@ public class Board {
         if (y == null) return false;
         if (this.getClass() != y.getClass()) return false;
         Board that = (Board) y;
+        
+        if (this.dimension() != that.dimension()) return false;
         
         for (int i = 0; i < this.dimension(); i++) {
             for (int j = 0; j < this.dimension(); j++) {
